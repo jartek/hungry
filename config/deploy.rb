@@ -2,6 +2,7 @@ require 'mina/bundler'
 require 'mina/rails'
 require 'mina/git'
 require 'mina/rvm'    # for rvm support. (http://rvm.io)
+require 'mina/unicorn'
 
 # Basic settings:
 #   domain       - The hostname to SSH to.
@@ -19,7 +20,7 @@ set :branch, 'master'
 
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
-set :shared_paths, ['config/database.yml', 'log']
+set :shared_paths, ['config/database.yml', 'log', 'config/secrets.yml']
 
 # Optional settings:
 set :user, 'app'    # Username in the server to SSH to.
@@ -48,6 +49,7 @@ task :setup => :environment do
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/#{shared_path}/config"]
 
   queue! %[touch "#{deploy_to}/#{shared_path}/config/database.yml"]
+  queue! %[touch "#{deploy_to}/#{shared_path}/config/secrets.yml"]
 end
 
 desc "Deploys the current version to the server."
@@ -63,7 +65,7 @@ task :deploy => :environment do
 
     to :launch do
       queue "mkdir -p #{deploy_to}/#{current_path}/tmp/"
-      queue "sudo service unicorn restart"
+      invoke :'unicorn:restart'
     end
   end
 end

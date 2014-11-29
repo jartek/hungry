@@ -7,4 +7,5 @@ gem 'unicorn'
 group :development do
   gem 'spring'
   gem 'mina'
+  gem 'mina-unicorn', :require => false
 end
