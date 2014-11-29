@@ -5,4 +5,5 @@ gem 'unicorn'
 
 group :development do
   gem 'spring'
+  gem 'mina'
 end
