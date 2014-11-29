@@ -2,7 +2,6 @@ require 'mina/bundler'
 require 'mina/rails'
 require 'mina/git'
 require 'mina/rvm'    # for rvm support. (http://rvm.io)
-require 'mina/unicorn'
 
 # Basic settings:
 #   domain       - The hostname to SSH to.
@@ -10,7 +9,7 @@ require 'mina/unicorn'
 #   repository   - Git repo to clone from. (needed by mina/git)
 #   branch       - Branch name to deploy. (needed by mina/git)
 
-set :domain, '128.199.195.188'
+set :domain, '128.199.181.68'
 set :deploy_to, '/home/app/shop'
 set :repository, 'git@github.com:jartek/shop.git'
 set :branch, 'master'
@@ -65,7 +64,7 @@ task :deploy => :environment do
 
     to :launch do
       queue "mkdir -p #{deploy_to}/#{current_path}/tmp/"
-      invoke :'unicorn:restart'
+      queue "sudo service unicorn restart"
     end
   end
 end

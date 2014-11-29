@@ -1,5 +1,5 @@
 app_dir = File.expand_path('../../', __FILE__)
-shared_dir = File.expand_path('../../../shared/', __FILE__)
+shared_dir = File.expand_path('../../../../shared/', __FILE__)
 
 worker_processes 2
 preload_app true
