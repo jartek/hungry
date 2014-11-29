@@ -1,7 +1,7 @@
 root = File.expand_path(File.dirname(File.dirname(__FILE__)))
 working_directory root
 
-pid "#{root}/tmp/pids/unicorn.pid"
+pid "#{root}/tmp/unicorn.pid"
 
 stderr_path "#{root}/log/unicorn.err"
 stdout_path "#{root}/log/unicorn.log"
