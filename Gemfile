@@ -10,3 +10,7 @@ group :development do
   gem 'mina'
   gem 'mina-unicorn', :require => false
 end
+
+group :development, :test do
+  gem 'rspec-rails', '~> 3.0'
+end
