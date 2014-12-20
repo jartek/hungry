@@ -24,3 +24,7 @@ group :development, :test do
   gem 'rspec-rails', '~> 3.0'
   gem 'airborne'
 end
+
+group :test do
+  gem 'shoulda-matchers', require: false
+end
