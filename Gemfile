@@ -9,17 +9,18 @@ gem 'pg'
 gem 'unicorn'
 gem 'kaminari'
 
-gem 'devise_token_auth', path: '../devise_token_auth/'
+gem 'devise_token_auth', github: 'jartek/devise_token_auth', branch: 'exclude_devise_modules'
 gem 'omniauth'
 
 group :development do
-  gem 'spring'
-  gem 'better_errors', '~> 2.0.0'
-  gem "binding_of_caller"
-  gem 'mina'
-  gem 'mina-unicorn', :require => false
+  gem 'spring-commands-rspec', require: false
+  gem 'guard-bundler', require: false
+  gem 'guard-rspec', require: false
+  gem 'mina', require: false
+  gem 'mina-unicorn', require: false
 end
 
 group :development, :test do
   gem 'rspec-rails', '~> 3.0'
+  gem 'airborne'
 end
