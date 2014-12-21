@@ -4,4 +4,16 @@ class User < ActiveRecord::Base
           :omniauthable
 
   include DeviseTokenAuth::Concerns::User
+
+  enum role: [:user, :client, :admin]
+
+  after_initialize :set_default_role, if: :new_record?
+
+  validates :role, presence: true, inclusion: { in: roles.keys }
+
+  private
+
+  def set_default_role
+    self.role ||= :user
+  end
 end
