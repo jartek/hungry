@@ -112,6 +112,8 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    pundit (0.3.0)
+      activesupport (>= 3.0.0)
     rack (1.5.2)
     rack-cors (0.2.9)
     rack-test (0.6.2)
@@ -207,6 +209,7 @@ DEPENDENCIES
   mina-unicorn
   omniauth
   pg
+  pundit
   rack-cors
   rails-api
   rspec-rails (~> 3.0)

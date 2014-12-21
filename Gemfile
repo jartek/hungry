@@ -12,6 +12,8 @@ gem 'kaminari'
 gem 'devise_token_auth', github: 'jartek/devise_token_auth', branch: 'exclude_devise_modules'
 gem 'omniauth'
 
+gem "pundit"
+
 group :development do
   gem 'spring-commands-rspec', require: false
   gem 'guard-bundler', require: false
