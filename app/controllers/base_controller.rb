@@ -1,39 +1,39 @@
 class BaseController < ApplicationController
   before_action :set_resource, only: [:update, :destroy, :show]
+
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
+
   respond_to :json
 
   def create
-    set_resource(resource_class.build(resource_params))
+    set_resource(resource_class.new(resource_params))
 
     if get_resource.save
-      render :show, status: :created
+      render json: get_resource, status: :created
     else
       render json: get_resource.errors, status: :unprocessable_entity
     end
   end
 
   def destroy
-    if get_resource.destroy
-      head :no_content
-    else
-      render json: get_resource.errors, status: :unprocessable_entity
-    end
+    get_resource.destroy
+    head :no_content
   end
 
   def index
     pluralized_resource_name = "#{resource_name.pluralize}"
-    resources = resource_class.where(filter_params).page(pagination_params[:page]).per(pagination_params[:per_page])
+    resources = resource_class.filtered_per_page(filter_params, pagination_params)
     instance_variable_set("@#{pluralized_resource_name}", resources)
-    respond_with instance_variable_get("@#{pluralized_resource_name}")
+    render json: instance_variable_get("@#{pluralized_resource_name}")
   end
 
   def show
-    respond_with get_resource
+    render json: get_resource, status: :ok
   end
 
   def update
     if get_resource.update(resource_params)
-      render :show, status: :ok
+      head :ok
     else
       render json: get_resource.errors, status: :unprocessable_entity
     end
@@ -68,5 +68,9 @@ class BaseController < ApplicationController
   def set_resource(resource = nil)
     resource ||= resource_class.find(params[:id])
     instance_variable_set("@#{resource_name}", resource)
+  end
+
+  def record_not_found
+    head :not_found
   end
 end
