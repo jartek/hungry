@@ -1,6 +1,4 @@
-require 'rails_helper'
-
-shared_examples 'api resource' do |args|
+shared_examples 'an api resource' do |args|
   let(:resource_class) { args[:resource].capitalize.constantize }
   let(:resource) { args[:resource] }
 
