@@ -1,13 +1,16 @@
 shared_examples 'an api resource' do |args|
   let(:resource_class) { args[:resource].capitalize.constantize }
   let(:resource) { args[:resource] }
+  let(:nested_resource) { args[:nested_resource] }
 
   let(:object) { double("#{resource_class}", { id: 1 }) }
   let(:another_object) { double("#{resource_class}", { id: 2 }) }
 
   describe "Setup" do
     before do
-      get :index
+      @params ||= {}
+      @params["#{nested_resource}_id"] = 123 if nested_resource
+      get :index, @params
     end
 
     it "sets the correct resource name" do
@@ -22,6 +25,7 @@ shared_examples 'an api resource' do |args|
   describe "POST /create" do
     before do
       @params ||= {}
+      @params["#{nested_resource}_id"] = 123 if nested_resource
       @params[resource] = {
         id: 123
       }
@@ -50,23 +54,32 @@ shared_examples 'an api resource' do |args|
   end
 
   describe "DELETE /destroy" do
+    before do
+      @params ||= {}
+      @params["#{nested_resource}_id"] = 123 if nested_resource
+    end
+
     context 'with valid data' do
-      it "destroys a restaurant" do
+      before do
+        @params["id"] = object.id
+      end
+
+      it "destroys a resource" do
         allow(resource_class).to receive(:find).and_return(object)
         allow(object).to receive(:destroy).and_return(true)
-        delete :destroy, {
-          id: object.id
-        }
+        delete :destroy, @params
 
         expect(response).to have_http_status(:no_content)
       end
     end
 
     context 'with invalid data' do
-      it "throws a 404 if restaurant is not found" do
-        delete :destroy, {
-          id: 123456
-        }
+      before do
+        @params["id"] = 123456
+      end
+
+      it "throws a 404 if resource is not found" do
+        delete :destroy, @params
 
         expect(response).to have_http_status(:not_found)
       end
@@ -74,40 +87,52 @@ shared_examples 'an api resource' do |args|
   end
 
   describe "GET /index" do
-    it "returns a list of restaurants" do
+    before do
+      @params ||= {}
+      @params["#{nested_resource}_id"] = 123 if nested_resource
+    end
+
+    it "returns a list of resources" do
       objects = [object, another_object]
       allow(resource_class).to receive(:filtered_per_page).and_return(objects)
-      get :index
-      expect(assigns[:restaurants]).to eq(objects)
+      get :index, @params
+      expect(assigns["#{resource.pluralize}"]).to eq(objects)
     end
   end
 
   describe "GET /show" do
+    before do
+      @params ||= {}
+      @params["#{nested_resource}_id"] = 123 if nested_resource
+    end
+
     context 'with valid data' do
+      before do
+        @params["id"] = object.id
+      end
+
       it "returns successfully" do
         allow(resource_class).to receive(:find).and_return(object)
 
-        get :show, {
-          id: object.id
-        }
+        get :show, @params
         expect(response).to have_http_status(:ok)
       end
 
-      it "returns a restaurant" do
+      it "returns a resource" do
         allow(resource_class).to receive(:find).and_return(object)
-        get :show, {
-          id: object.id
-        }
+        get :show, @params
 
-        expect(assigns[:restaurant]).to eq(object)
+        expect(assigns[resource]).to eq(object)
       end
     end
 
     context 'with invalid data' do
-      it "throws a 404 if restaurant is not found" do
-        get :show, {
-          id: 123456
-        }
+      before do
+        @params["id"] = 123456
+      end
+
+      it "throws a 404 if resource is not found" do
+        get :show, @params
 
         expect(response).to have_http_status(:not_found)
       end
@@ -116,7 +141,9 @@ shared_examples 'an api resource' do |args|
 
   describe "PUT /update" do
     before do
-      @params ||= { id: 123 }
+      @params ||= {}
+      @params["#{nested_resource}_id"] = 123 if nested_resource
+      @params["id"] = object.id
       @params[resource] = {
         new_data: '123'
       }
@@ -133,10 +160,9 @@ shared_examples 'an api resource' do |args|
     end
 
     context 'with invalid data' do
-      it "throws a 404 if restaurant is not found" do
-        put :update, {
-          id: 123456
-        }
+      it "throws a 404 if resource is not found" do
+        @params["id"] = 123456
+        put :update, @params
 
         expect(response).to have_http_status(:not_found)
       end

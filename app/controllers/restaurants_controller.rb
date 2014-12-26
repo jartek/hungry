@@ -1,4 +1,4 @@
-class RestaurantController < BaseController
+class RestaurantsController < BaseController
 
   private
 

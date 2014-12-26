@@ -11,6 +11,8 @@ class User < ActiveRecord::Base
 
   validates :role, presence: true, inclusion: { in: roles.keys }
 
+  has_many :reviews
+
   private
 
   def set_default_role
