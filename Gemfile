@@ -9,7 +9,7 @@ gem 'pg'
 gem 'unicorn'
 gem 'kaminari'
 
-gem 'devise_token_auth', github: 'lynndylanhurley/devise_token_auth'
+gem 'devise_token_auth', github: 'jartek/devise_token_auth', branch: 'fixes'
 gem 'omniauth'
 
 gem "pundit"
