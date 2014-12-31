@@ -1,13 +1,13 @@
 class BaseController < ApplicationController
   before_action :set_resource, only: [:update, :destroy, :show]
+  before_action :create_resource, only: :create
+  before_action :authorize_resource, only: [:create, :destroy, :show, :update]
 
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
 
   respond_to :json
 
   def create
-    set_resource(resource_class.new(resource_params))
-    authorize get_resource
     if get_resource.save
       render json: get_resource, status: :created
     else
@@ -16,7 +16,6 @@ class BaseController < ApplicationController
   end
 
   def destroy
-    authorize get_resource
     get_resource.destroy
     head :no_content
   end
@@ -33,7 +32,6 @@ class BaseController < ApplicationController
   end
 
   def update
-    authorize get_resource
     if get_resource.update(resource_params)
       head :ok
     else
@@ -74,5 +72,13 @@ class BaseController < ApplicationController
 
   def record_not_found
     head :not_found
+  end
+
+  def create_resource
+    set_resource(resource_class.new(resource_params))
+  end
+
+  def authorize_resource
+    authorize get_resource
   end
 end

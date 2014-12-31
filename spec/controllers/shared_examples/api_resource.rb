@@ -5,11 +5,11 @@ shared_examples 'an api resource' do |args|
 
   let(:object) { double("#{resource_class}", { id: 1 }) }
   let(:another_object) { double("#{resource_class}", { id: 2 }) }
-
   describe "Setup" do
     before do
       @params ||= {}
       @params["#{nested_resource}_id"] = 123 if nested_resource
+      # allow(controller).to receive(:policy_scope).with(resource_class).and_return([object, another_object])
       get :index, @params
     end
 
@@ -36,6 +36,7 @@ shared_examples 'an api resource' do |args|
         it "creates a resource" do
           allow(resource_class).to receive(:new).and_return(object)
           allow(controller).to receive(:authorize).with(object)
+          allow(controller).to receive(:verify_authorized)
           allow(object).to receive(:save).and_return(true)
           post :create, @params
 
@@ -47,6 +48,7 @@ shared_examples 'an api resource' do |args|
         it "does not create a resource" do
           allow(resource_class).to receive(:new).and_return(object)
           allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
+          allow(controller).to receive(:verify_authorized)
           allow(object).to receive(:save).and_return(true)
           post :create, @params
 
@@ -59,6 +61,7 @@ shared_examples 'an api resource' do |args|
       it "does not create a resource" do
         allow(resource_class).to receive(:new).and_return(object)
         allow(controller).to receive(:authorize).with(object)
+        allow(controller).to receive(:verify_authorized)
         allow(object).to receive(:save).and_return(false)
         allow(object).to receive(:errors)
 
@@ -83,6 +86,7 @@ shared_examples 'an api resource' do |args|
         it "destroys a resource" do
           allow(resource_class).to receive(:find).and_return(object)
           allow(controller).to receive(:authorize).with(object)
+          allow(controller).to receive(:verify_authorized)
           allow(object).to receive(:destroy).and_return(true)
           delete :destroy, @params
 
@@ -94,6 +98,7 @@ shared_examples 'an api resource' do |args|
         it "destroys a resource" do
           allow(resource_class).to receive(:find).and_return(object)
           allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
+          allow(controller).to receive(:verify_authorized)
           allow(object).to receive(:destroy).and_return(true)
           delete :destroy, @params
 
@@ -124,6 +129,7 @@ shared_examples 'an api resource' do |args|
     it "returns a list of resources" do
       objects = [object, another_object]
       allow(resource_class).to receive(:filtered_per_page).and_return(objects)
+
       get :index, @params
       expect(assigns["#{resource.pluralize}"]).to eq(objects)
     end
@@ -140,18 +146,35 @@ shared_examples 'an api resource' do |args|
         @params["id"] = object.id
       end
 
-      it "returns successfully" do
-        allow(resource_class).to receive(:find).and_return(object)
+      context 'authorized user' do
+        it "returns successfully" do
+          allow(resource_class).to receive(:find).and_return(object)
+          allow(controller).to receive(:authorize).with(object)
+          allow(controller).to receive(:verify_authorized)
 
-        get :show, @params
-        expect(response).to have_http_status(:ok)
+          get :show, @params
+          expect(response).to have_http_status(:ok)
+        end
+
+        it "returns a resource" do
+          allow(resource_class).to receive(:find).and_return(object)
+          allow(controller).to receive(:authorize).with(object)
+          allow(controller).to receive(:verify_authorized)
+          get :show, @params
+
+          expect(assigns[resource]).to eq(object)
+        end
       end
 
-      it "returns a resource" do
-        allow(resource_class).to receive(:find).and_return(object)
-        get :show, @params
+      context 'unauthorized user' do
+        it "fails" do
+          allow(resource_class).to receive(:find).and_return(object)
+          allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
+          allow(controller).to receive(:verify_authorized)
 
-        expect(assigns[resource]).to eq(object)
+          get :show, @params
+          expect(response).to have_http_status(:forbidden)
+        end
       end
     end
 
@@ -183,6 +206,7 @@ shared_examples 'an api resource' do |args|
         it "returns successfully" do
           allow(resource_class).to receive(:find).and_return(object)
           allow(controller).to receive(:authorize).with(object)
+          allow(controller).to receive(:verify_authorized)
           allow(object).to receive(:update).and_return(true)
           put :update, @params
 
@@ -194,6 +218,7 @@ shared_examples 'an api resource' do |args|
         it "returns successfully" do
           allow(resource_class).to receive(:find).and_return(object)
           allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
+          allow(controller).to receive(:verify_authorized)
           allow(object).to receive(:update).and_return(true)
           put :update, @params
 
@@ -206,6 +231,7 @@ shared_examples 'an api resource' do |args|
       it "throws a 404 if resource is not found" do
         @params["id"] = 123456
         allow(controller).to receive(:authorize).with(object)
+        allow(controller).to receive(:verify_authorized)
         put :update, @params
 
         expect(response).to have_http_status(:not_found)
@@ -214,6 +240,7 @@ shared_examples 'an api resource' do |args|
       it "returns a 422 if it fails" do
         allow(resource_class).to receive(:find).and_return(object)
         allow(controller).to receive(:authorize).with(object)
+        allow(controller).to receive(:verify_authorized)
         allow(object).to receive(:update).and_return(false)
         allow(object).to receive(:errors)
         put :update, @params
