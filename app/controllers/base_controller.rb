@@ -7,7 +7,7 @@ class BaseController < ApplicationController
 
   def create
     set_resource(resource_class.new(resource_params))
-
+    authorize get_resource
     if get_resource.save
       render json: get_resource, status: :created
     else
@@ -16,6 +16,7 @@ class BaseController < ApplicationController
   end
 
   def destroy
+    authorize get_resource
     get_resource.destroy
     head :no_content
   end
@@ -32,6 +33,7 @@ class BaseController < ApplicationController
   end
 
   def update
+    authorize get_resource
     if get_resource.update(resource_params)
       head :ok
     else

@@ -32,18 +32,33 @@ shared_examples 'an api resource' do |args|
     end
 
     context 'with valid data' do
-      it "creates a resource" do
-        allow(resource_class).to receive(:new).and_return(object)
-        allow(object).to receive(:save).and_return(true)
-        post :create, @params
+      context 'authorized user' do
+        it "creates a resource" do
+          allow(resource_class).to receive(:new).and_return(object)
+          allow(controller).to receive(:authorize).with(object)
+          allow(object).to receive(:save).and_return(true)
+          post :create, @params
 
-        expect(response).to have_http_status(:created)
+          expect(response).to have_http_status(:created)
+        end
+      end
+
+      context 'unauthorized user' do
+        it "does not create a resource" do
+          allow(resource_class).to receive(:new).and_return(object)
+          allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
+          allow(object).to receive(:save).and_return(true)
+          post :create, @params
+
+          expect(response).to have_http_status(:forbidden)
+        end
       end
     end
 
     context 'with invalid data' do
       it "does not create a resource" do
         allow(resource_class).to receive(:new).and_return(object)
+        allow(controller).to receive(:authorize).with(object)
         allow(object).to receive(:save).and_return(false)
         allow(object).to receive(:errors)
 
@@ -64,12 +79,26 @@ shared_examples 'an api resource' do |args|
         @params["id"] = object.id
       end
 
-      it "destroys a resource" do
-        allow(resource_class).to receive(:find).and_return(object)
-        allow(object).to receive(:destroy).and_return(true)
-        delete :destroy, @params
+      context 'authorized user' do
+        it "destroys a resource" do
+          allow(resource_class).to receive(:find).and_return(object)
+          allow(controller).to receive(:authorize).with(object)
+          allow(object).to receive(:destroy).and_return(true)
+          delete :destroy, @params
 
-        expect(response).to have_http_status(:no_content)
+          expect(response).to have_http_status(:no_content)
+        end
+      end
+
+      context 'unauthorized user' do
+        it "destroys a resource" do
+          allow(resource_class).to receive(:find).and_return(object)
+          allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
+          allow(object).to receive(:destroy).and_return(true)
+          delete :destroy, @params
+
+          expect(response).to have_http_status(:forbidden)
+        end
       end
     end
 
@@ -150,18 +179,33 @@ shared_examples 'an api resource' do |args|
     end
 
     context 'with valid data' do
-      it "returns successfully" do
-        allow(resource_class).to receive(:find).and_return(object)
-        allow(object).to receive(:update).and_return(true)
-        put :update, @params
+      context 'authorized user' do
+        it "returns successfully" do
+          allow(resource_class).to receive(:find).and_return(object)
+          allow(controller).to receive(:authorize).with(object)
+          allow(object).to receive(:update).and_return(true)
+          put :update, @params
 
-        expect(response).to have_http_status(:ok)
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'unauthorized user' do
+        it "returns successfully" do
+          allow(resource_class).to receive(:find).and_return(object)
+          allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
+          allow(object).to receive(:update).and_return(true)
+          put :update, @params
+
+          expect(response).to have_http_status(:forbidden)
+        end
       end
     end
 
     context 'with invalid data' do
       it "throws a 404 if resource is not found" do
         @params["id"] = 123456
+        allow(controller).to receive(:authorize).with(object)
         put :update, @params
 
         expect(response).to have_http_status(:not_found)
@@ -169,6 +213,7 @@ shared_examples 'an api resource' do |args|
 
       it "returns a 422 if it fails" do
         allow(resource_class).to receive(:find).and_return(object)
+        allow(controller).to receive(:authorize).with(object)
         allow(object).to receive(:update).and_return(false)
         allow(object).to receive(:errors)
         put :update, @params

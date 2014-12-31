@@ -1,6 +1,7 @@
 GIT
-  remote: git://github.com/lynndylanhurley/devise_token_auth.git
-  revision: dc55f6224d93f4af239b6c43b979168fc396c35c
+  remote: git://github.com/jartek/devise_token_auth.git
+  revision: bd3d45d2d4070c177db780711d5eb7f50745b980
+  branch: fixes
   specs:
     devise_token_auth (0.1.31.beta1)
       devise (~> 3.3)

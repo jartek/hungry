@@ -6,6 +6,7 @@ require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'database_cleaner'
 require 'shoulda/matchers'
+require 'pundit/rspec'
 require 'airborne'
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -47,6 +48,8 @@ RSpec.configure do |config|
   config.after(:each) do
     DatabaseCleaner.clean
   end
+
+  config.include Devise::TestHelpers, type: :controller
 
   # RSpec Rails can automatically mix in different behaviours to your tests
   # based on their file location, for example enabling you to call `get` and
