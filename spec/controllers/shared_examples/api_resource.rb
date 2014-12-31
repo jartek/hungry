@@ -9,7 +9,6 @@ shared_examples 'an api resource' do |args|
     before do
       @params ||= {}
       @params["#{nested_resource}_id"] = 123 if nested_resource
-      # allow(controller).to receive(:policy_scope).with(resource_class).and_return([object, another_object])
       get :index, @params
     end
 
