@@ -4,6 +4,6 @@ class Admin < User
   private
 
   def set_default_role
-    self.role ||= :admin
+    self.role = :admin
   end
 end

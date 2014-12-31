@@ -8,4 +8,10 @@ describe User, type: :model do
   describe 'associations' do
     it { should have_many :reviews }
   end
+
+  describe "callbacks" do
+    it "sets role after initializing" do
+      expect(User.new.role).to eq('user')
+    end
+  end
 end

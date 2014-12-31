@@ -1,28 +1,45 @@
 require 'rails_helper'
 
 describe RestaurantPolicy do
+  subject { described_class }
 
-  let(:user) { User.new }
+  let(:restaurant) { Restaurant.new }
 
-  subject { RestaurantPolicy }
+  pending 'for a visitor'
 
-  permissions ".scope" do
-    pending "add some examples to (or delete) #{__FILE__}"
+  context 'for a registered user' do
+    let(:user) { User.new }
+
+    [:create?, :update?, :destroy?].each do |action|
+      permissions action do
+        it { is_expected.to_not permit(user, restaurant) }
+      end
+    end
+
+    [:show?, :index?].each do |action|
+      permissions action do
+        it { is_expected.to permit(user, restaurant) }
+      end
+    end
   end
 
-  permissions :create? do
-    pending "add some examples to (or delete) #{__FILE__}"
+  context 'for a client' do
+    let(:user) { Client.new }
+
+    [:create?, :update?, :destroy?, :show?, :index?].each do |action|
+      permissions action do
+        it { is_expected.to permit(user, restaurant) }
+      end
+    end
   end
 
-  permissions :show? do
-    pending "add some examples to (or delete) #{__FILE__}"
-  end
+  context 'for an admin' do
+    let(:user) { Admin.new }
 
-  permissions :update? do
-    pending "add some examples to (or delete) #{__FILE__}"
-  end
-
-  permissions :destroy? do
-    pending "add some examples to (or delete) #{__FILE__}"
+    [:create?, :update?, :destroy?, :show?, :index?].each do |action|
+      permissions action do
+        it { is_expected.to permit(user, restaurant) }
+      end
+    end
   end
 end
