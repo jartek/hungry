@@ -6,15 +6,15 @@ class RestaurantPolicy < ApplicationPolicy
   end
 
   def create?
-    user.client? || user.admin?
+    user && (user.client? || user.admin?)
   end
 
   def update?
-    user.client? || user.admin?
+    user && (user.client? || user.admin?)
   end
 
   def destroy?
-    user.client? || user.admin?
+    user && (user.client? || user.admin?)
   end
 
   def index?

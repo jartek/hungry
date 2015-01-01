@@ -1,6 +1,8 @@
 class Client < User
   self.table_name = "users"
 
+  default_scope { where(role: 1) }
+
   has_many :restaurants
 
   private

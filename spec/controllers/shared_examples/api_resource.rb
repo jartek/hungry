@@ -5,6 +5,7 @@ shared_examples 'an api resource' do |args|
 
   let(:object) { double("#{resource_class}", { id: 1 }) }
   let(:another_object) { double("#{resource_class}", { id: 2 }) }
+
   describe "Setup" do
     before do
       @params ||= {}
@@ -17,7 +18,7 @@ shared_examples 'an api resource' do |args|
     end
 
     it "sets the correct resource class" do
-      expect(assigns[:resource_class]).to eql(resource_class)
+      expect(assigns[:resource_klass]).to eql(resource_class)
     end
   end
 

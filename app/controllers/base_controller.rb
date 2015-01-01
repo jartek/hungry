@@ -3,6 +3,8 @@ class BaseController < ApplicationController
   before_action :create_resource, only: :create
   before_action :authorize_resource, only: [:create, :destroy, :show, :update]
 
+  after_action :verify_authorized, except: [:index]
+
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
 
   respond_to :json
@@ -22,7 +24,7 @@ class BaseController < ApplicationController
 
   def index
     pluralized_resource_name = "#{resource_name.pluralize}"
-    resources = resource_class.filtered_per_page(filter_params, pagination_params)
+    resources = resource_klass.filtered_per_page(filter_params, pagination_params)
     instance_variable_set("@#{pluralized_resource_name}", resources)
     render json: instance_variable_get("@#{pluralized_resource_name}")
   end
@@ -53,8 +55,9 @@ class BaseController < ApplicationController
     instance_variable_get("@#{resource_name}")
   end
 
-  def resource_class
-    @resource_class ||= resource_name.classify.constantize
+  # resource_class conflicts with devise, so used klass here
+  def resource_klass
+    @resource_klass ||= resource_name.classify.constantize
   end
 
   def resource_name
@@ -66,7 +69,7 @@ class BaseController < ApplicationController
   end
 
   def set_resource(resource = nil)
-    resource ||= resource_class.find(params[:id])
+    resource ||= resource_klass.find(params[:id])
     instance_variable_set("@#{resource_name}", resource)
   end
 
@@ -75,7 +78,7 @@ class BaseController < ApplicationController
   end
 
   def create_resource
-    set_resource(resource_class.new(resource_params))
+    set_resource(resource_klass.new(resource_params))
   end
 
   def authorize_resource
