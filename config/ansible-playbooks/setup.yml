@@ -1,0 +1,21 @@
+- name: update apt cache
+  apt: update_cache=yes
+
+- name: upgrade system
+  apt: upgrade=safe
+
+- name: install core packages
+  apt: "pkg={{ item }} state=installed"
+  with_items:
+    - build-essential
+    - git-core
+    - vim
+    - libxml2-dev
+    - nodejs
+    - git-core
+    - curl
+    - python-dev
+    - libpq-dev
+
+- name: Copy unicorn upstart
+  copy: src=templates/unicorn.production.upstart.conf dest=/etc/init/unicorn.conf

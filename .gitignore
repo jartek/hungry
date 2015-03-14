@@ -1,6 +1,5 @@
 .vagrant
-config/ansible-playbooks
-.rspec
+g.rspec
 /log
 /tmp
 /coverage/

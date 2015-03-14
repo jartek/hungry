@@ -1,0 +1,78 @@
+---
+- hosts: all
+  sudo: True
+  user: vagrant
+
+  vars:
+    app_name: shop
+    user: vagrant
+    user_password: "{{ lookup('password', 'credentials/deploy.crypted') }}"
+    rails_env: "development"
+
+    db_name: "{{ app_name }}"
+    db_user: "app"
+    db_password: "{{ lookup('password', 'credentials/' + rails_env + '.postgres length=30') }}"
+
+    ruby_version: 2.1.5
+    rvm1_rubies:
+      - '2.1.5'
+    rvm1_install_path: '/home/vagrant/.rvm'
+    rvm1_install_flags: '--auto-dotfiles --user-install'
+
+    postgresql_databases:
+      - name: "{{ db_name }}_development"
+        hstore: no
+        uuid_ossp: no
+
+      - name: "{{ db_name }}_test"
+        hstore: no
+        uuid_ossp: no
+
+    postgresql_users:
+      - name: "{{ db_user }}"
+        pass: "{{ db_password }}"
+        encrypted: no
+
+    postgresql_user_privileges:
+      - name: "{{ db_user }}"
+        db: "{{ db_name }}_development"
+        priv: "ALL"
+      - name: "{{ db_user }}"
+        db: "{{ db_name }}_test"
+        priv: "ALL"
+
+  tasks:
+    - include: setup.yml
+    - include: postgres.yml
+    - include: redis.yml
+    - include: nginx.yml
+    - include: bundler.yml
+
+    - name: Create shared directory
+      file: 'path=/home/{{user}}/shared/{{item}} state=directory owner={{user}} group=root'
+      with_items:
+      - pids
+      - log
+      - sockets
+
+    - name: Copy unicorn upstart
+      copy: src=templates/unicorn.development.upstart.conf dest=/etc/init/unicorn.conf
+      notify: restart unicorn
+
+    - postgresql_user: "name={{ db_user }} password={{ db_password }} role_attr_flags=CREATEDB,NOSUPERUSER"
+
+    - postgresql_db: "name={{ item }} owner={{ db_user }}"
+      with_items:
+      - "{{ db_name }}_development"
+      - "{{ db_name }}_test"
+
+  roles:
+    - rvm_io.rvm1-ruby
+    - ANXS.postgresql
+
+  handlers:
+    - name: Restart ssh
+      service: name=nginx enabled=yes state=restarted
+
+    - name: restart unicorn
+      service: name=unicorn enabled=yes state=restarted

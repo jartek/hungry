@@ -1,0 +1,50 @@
+---
+- hosts: all
+  sudo: True
+
+  vars:
+    app_name: shop
+    user: app
+    user_password: "{{ lookup('password', 'credentials/deploy.crypted') }}"
+    rails_env: "production"
+
+    db_name: "{{ app_name }}_{{ rails_env }}"
+    db_user: "{{user}}"
+    db_password: "{{ lookup('password', 'credentials/' + rails_env + '.postgres length=30') }}"
+
+    ruby_version: 2.1.5
+    rvm1_rubies:
+      - '2.1.5'
+    rvm1_install_path: '/home/app/.rvm'
+    rvm1_install_flags: '--auto-dotfiles --user-install'
+
+    postgresql_databases:
+      - name: "{{ db_name }}"
+        hstore: no
+        uuid_ossp: no
+
+    postgresql_users:
+      - name: "{{ db_user }}"
+        pass: "{{ db_password }}"
+        encrypted: no
+
+    postgresql_user_privileges:
+      - name: "{{ db_user }}"
+        db: "{{ db_name }}"
+        priv: "ALL"
+
+  tasks:
+    - include: user.yml
+    - include: setup.yml
+    - include: postgres.yml
+    - include: redis.yml
+    - include: nginx.yml
+    - include: bundler.yml
+
+  roles:
+    - rvm_io.rvm1-ruby
+    - ANXS.postgresql
+
+  handlers:
+    - name: Restart ssh
+      service: name=nginx enabled=yes state=restarted
