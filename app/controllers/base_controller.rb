@@ -10,7 +10,8 @@ class BaseController < ApplicationController
   respond_to :json
 
   def create
-    if get_resource.save
+    builder = resource_builder.new(get_resource, params)
+    if builder.save!
       render json: get_resource, status: :created
     else
       render json: get_resource.errors, status: :unprocessable_entity
@@ -58,6 +59,10 @@ class BaseController < ApplicationController
   # resource_class conflicts with devise, so used klass here
   def resource_klass
     @resource_klass ||= resource_name.classify.constantize
+  end
+
+  def resource_builder
+    @resource_builder ||= "#{resource_klass}Builder".constantize
   end
 
   def resource_name

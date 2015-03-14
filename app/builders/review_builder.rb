@@ -1,0 +1,2 @@
+class ReviewBuilder < ApplicationBuilder
+end

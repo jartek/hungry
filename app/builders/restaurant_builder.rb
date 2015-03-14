@@ -1,0 +1,3 @@
+class RestaurantBuilder < ApplicationBuilder
+
+end

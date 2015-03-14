@@ -1,10 +1,14 @@
 shared_examples 'an api resource' do |args|
-  let(:resource_class) { args[:resource].capitalize.constantize }
   let(:resource) { args[:resource] }
+  let(:resource_class) { resource.capitalize.constantize }
+  let(:resource_builder) { "#{resource_class}Builder".constantize }
+  let(:resource_policy) { "#{resource_class}Policy".constantize }
   let(:nested_resource) { args[:nested_resource] }
 
   let(:object) { double("#{resource_class}", { id: 1 }) }
   let(:another_object) { double("#{resource_class}", { id: 2 }) }
+
+  let(:builder_obj) { double("#{resource_builder}") }
 
   describe "Setup" do
     before do
@@ -31,13 +35,25 @@ shared_examples 'an api resource' do |args|
       }
     end
 
+    it "sets the correct resource builder" do
+      allow(resource_class).to receive(:new).and_return(object)
+      allow(controller).to receive(:authorize).with(object)
+      allow(controller).to receive(:verify_authorized)
+      allow(resource_builder).to receive(:new).and_return(builder_obj)
+      allow(builder_obj).to receive(:save!).and_return(true)
+      post :create, @params
+
+      expect(assigns[:resource_builder]).to eql(resource_builder)
+    end
+
     context 'with valid data' do
       context 'authorized user' do
         it "creates a resource" do
           allow(resource_class).to receive(:new).and_return(object)
           allow(controller).to receive(:authorize).with(object)
           allow(controller).to receive(:verify_authorized)
-          allow(object).to receive(:save).and_return(true)
+          allow(resource_builder).to receive(:new).and_return(builder_obj)
+          allow(builder_obj).to receive(:save!).and_return(true)
           post :create, @params
 
           expect(response).to have_http_status(:created)
@@ -49,7 +65,8 @@ shared_examples 'an api resource' do |args|
           allow(resource_class).to receive(:new).and_return(object)
           allow(controller).to receive(:authorize).with(object).and_raise(Pundit::NotAuthorizedError)
           allow(controller).to receive(:verify_authorized)
-          allow(object).to receive(:save).and_return(true)
+          allow(resource_builder).to receive(:new).and_return(builder_obj)
+          allow(builder_obj).to receive(:save!).and_return(true)
           post :create, @params
 
           expect(response).to have_http_status(:forbidden)
@@ -62,7 +79,8 @@ shared_examples 'an api resource' do |args|
         allow(resource_class).to receive(:new).and_return(object)
         allow(controller).to receive(:authorize).with(object)
         allow(controller).to receive(:verify_authorized)
-        allow(object).to receive(:save).and_return(false)
+        allow(resource_builder).to receive(:new).and_return(builder_obj)
+        allow(builder_obj).to receive(:save!).and_return(false)
         allow(object).to receive(:errors)
 
         post :create, @params
