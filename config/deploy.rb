@@ -10,8 +10,8 @@ require 'mina/rvm'    # for rvm support. (http://rvm.io)
 #   branch       - Branch name to deploy. (needed by mina/git)
 
 set :domain, '128.199.181.68'
-set :deploy_to, '/home/app/shop'
-set :repository, 'git@github.com:jartek/shop.git'
+set :deploy_to, '/home/app/hungry'
+set :repository, 'git@github.com:jartek/hungry.git'
 set :branch, 'master'
 
 # For system-wide RVM install.
@@ -34,7 +34,7 @@ task :environment do
   # invoke :'rbenv:load'
 
   # For those using RVM, use this to load an RVM version@gemset.
-  invoke :'rvm:use[ruby-2.1.5@shop]'
+  invoke :'rvm:use[ruby-2.1.5@hungry]'
 end
 
 # Put any custom mkdir's in here for when `mina setup` is ran.

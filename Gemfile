@@ -13,6 +13,7 @@ gem 'devise_token_auth', github: 'jartek/devise_token_auth', branch: 'fixes'
 gem 'omniauth'
 
 gem "pundit"
+gem "seedbank"
 
 group :development do
   gem 'spring-commands-rspec', require: false

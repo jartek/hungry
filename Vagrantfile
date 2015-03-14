@@ -15,7 +15,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 3000, host: 3000
 
   config.vm.synced_folder '.', '/vagrant', disabled: true
-  config.vm.synced_folder '.', '/home/vagrant/shop/current', type: 'rsync'
+  config.vm.synced_folder '.', '/home/vagrant/hungry/current', type: 'rsync'
 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "config/ansible-playbooks/development.yml"

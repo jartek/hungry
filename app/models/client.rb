@@ -10,5 +10,4 @@ class Client < User
   def set_default_role
     self.role = :client
   end
-
 end

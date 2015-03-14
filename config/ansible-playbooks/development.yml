@@ -4,7 +4,7 @@
   user: vagrant
 
   vars:
-    app_name: shop
+    app_name: hungry
     user: vagrant
     user_password: "{{ lookup('password', 'credentials/deploy.crypted') }}"
     rails_env: "development"

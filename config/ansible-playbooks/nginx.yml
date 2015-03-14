@@ -9,7 +9,7 @@
       - sites-available
 
   - name: copy nginx conf
-    copy: "src=templates/shop.nginx.{{ rails_env }}.conf dest={{ item }}"
+    copy: "src=templates/hungry.nginx.{{ rails_env }}.conf dest={{ item }}"
     with_items:
       - /etc/nginx/sites-enabled/default.conf
       - /etc/nginx/sites-available/default.conf
